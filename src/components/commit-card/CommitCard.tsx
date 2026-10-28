@@ -16,6 +16,7 @@ import {
 import { toPng } from 'html-to-image';
 import { EvolutionPath } from '@/types';
 import { generateShareUrl, generateQrCodeDataUrl } from '@/utils/shareUrl';
+import { getOrCreateCurrentUserProfile } from '@/utils/referralEngine';
 
 interface CommitCardProps {
   originalProjectName: string;
@@ -43,12 +44,14 @@ export const CommitCard: React.FC<CommitCardProps> = ({
   const [commitId] = useState(() => `PULSE-${Math.floor(1000 + Math.random() * 9000)}`);
 
   const cardRef = useRef<HTMLDivElement>(null);
+  const currentUser = getOrCreateCurrentUserProfile();
 
   const shareUrl = generateShareUrl({
     title: evolutionPath.title,
     track: evolutionPath.track,
     authorName: authorName.trim() || undefined,
     domain: domainName,
+    referralCode: currentUser.referralCode,
   });
 
   // Generate verified QR code whenever shareUrl updates

@@ -84,6 +84,38 @@ export interface CollaborationSuggestion {
   synergyType: 'Shared Data Model' | 'API Contract' | 'Complementary Feature' | 'Workshop Pair';
 }
 
+export type ReferralStatus = 'pending' | 'qualified' | 'rejected';
+
+export interface ReferralRecord {
+  id: string;
+  referrerCode: string;
+  refereeEmailMasked: string;
+  refereeCollege: string;
+  status: ReferralStatus;
+  rejectionReason?: string;
+  creditsAwarded: number;
+  timestamp: string;
+  workshopRegistered: boolean;
+}
+
+export interface CreditLedgerEntry {
+  id: string;
+  delta: number;
+  balanceAfter: number;
+  reason: string;
+  timestamp: string;
+}
+
+export interface RewardMilestone {
+  tier: 'Bronze' | 'Silver' | 'Gold';
+  requiredReferrals: number;
+  creditsReward: number;
+  blueprintTitle: string;
+  blueprintDescription: string;
+  blueprintContent: string[];
+  isUnlocked: boolean;
+}
+
 export interface StudentProfile {
   id: string;
   name: string;
@@ -127,4 +159,40 @@ export interface GrowthMetricEvent {
   utmMedium?: string;
 }
 
-export type ActiveTab = 'landing' | 'evolution' | 'dashboard' | 'admin' | 'friend-view';
+/** Locally persisted evolution direction (Phase 7 Student Dashboard). */
+export interface SavedProject {
+  id: string;
+  originalProject: string;
+  domain: string;
+  path: EvolutionPath;
+  savedAt: string;
+}
+
+/** Lightweight local record when a Commit Card view is opened. */
+export interface CommitCardRecord {
+  id: string;
+  projectTitle: string;
+  track: EvolutionTrack;
+  domain: string;
+  createdAt: string;
+}
+
+export type DashboardActivityKind =
+  | 'project_saved'
+  | 'fork_created'
+  | 'commit_card_generated'
+  | 'workshop_registered'
+  | 'referral_qualified'
+  | 'referral_rejected';
+
+export interface DashboardActivityItem {
+  id: string;
+  kind: DashboardActivityKind;
+  title: string;
+  detail: string;
+  timestamp: string;
+  /** True when the source is browser localStorage prototype data. */
+  isPrototype: boolean;
+}
+
+export type ActiveTab = 'landing' | 'evolution' | 'referrals' | 'dashboard' | 'admin' | 'friend-view';

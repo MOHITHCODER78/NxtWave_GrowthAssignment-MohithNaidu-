@@ -6,6 +6,7 @@ export interface SharePayload {
   track: EvolutionTrack;
   authorName?: string;
   domain?: string;
+  referralCode?: string;
 }
 
 export interface ParsedFriendParams {
@@ -14,6 +15,7 @@ export interface ParsedFriendParams {
   track: EvolutionTrack;
   authorName: string;
   domain: string;
+  referralCode?: string;
   isMalformed?: boolean;
 }
 
@@ -31,8 +33,8 @@ function sanitize(input: string | null | undefined): string {
 
 /**
  * Generates a privacy-safe canonical project share URL.
- * Encodes only public project parameters (title, track, author display name).
- * Contains ZERO private student PII (no emails, phone numbers, or passwords).
+ * Combines Friend Mode and Referral attribution parameters seamlessly.
+ * Encodes only public project parameters. Contains ZERO private student PII.
  */
 export function generateShareUrl(payload: SharePayload): string {
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://projectpulse.live';
@@ -47,13 +49,23 @@ export function generateShareUrl(payload: SharePayload): string {
   if (payload.domain) {
     params.set('domain', payload.domain);
   }
+  if (payload.referralCode && payload.referralCode.trim()) {
+    params.set('ref', payload.referralCode.trim().toUpperCase());
+  }
 
   return `${origin}/?${params.toString()}`;
 }
 
 /**
- * Safely parses and validates Friend Mode query parameters.
- * Validates track values and sanitizes all string inputs.
+ * Generates a direct personal referral link without Friend Mode parameters.
+ */
+export function generateReferralOnlyUrl(referralCode: string): string {
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://projectpulse.live';
+  return `${origin}/?ref=${encodeURIComponent(referralCode.trim().toUpperCase())}`;
+}
+
+/**
+ * Safely parses and validates Friend Mode query parameters, including optional referral attribution.
  */
 export function parseFriendUrlParams(searchString: string): ParsedFriendParams | null {
   if (!searchString || !searchString.includes('view=friend')) {
@@ -68,10 +80,12 @@ export function parseFriendUrlParams(searchString: string): ParsedFriendParams |
     const rawTrack = params.get('track');
     const rawAuthor = params.get('by');
     const rawDomain = params.get('domain');
+    const rawRef = params.get('ref');
 
     const sanitizedTitle = sanitize(rawTitle);
     const sanitizedAuthor = sanitize(rawAuthor) || 'Fellow Student';
     const sanitizedDomain = sanitize(rawDomain) || 'Engineering Project';
+    const sanitizedRef = rawRef ? sanitize(rawRef).toUpperCase() : undefined;
 
     // Validate track strictly
     let track: EvolutionTrack = 'upgrade';
@@ -90,6 +104,7 @@ export function parseFriendUrlParams(searchString: string): ParsedFriendParams |
         track: 'upgrade',
         authorName: sanitizedAuthor,
         domain: sanitizedDomain,
+        referralCode: sanitizedRef,
         isMalformed: true,
       };
     }
@@ -100,6 +115,7 @@ export function parseFriendUrlParams(searchString: string): ParsedFriendParams |
       track,
       authorName: sanitizedAuthor,
       domain: sanitizedDomain,
+      referralCode: sanitizedRef,
       isMalformed,
     };
   } catch (err) {

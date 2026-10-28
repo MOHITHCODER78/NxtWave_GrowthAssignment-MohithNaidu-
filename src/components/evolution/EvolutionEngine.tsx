@@ -12,7 +12,8 @@ import {
   Target, 
   Cpu, 
   HelpCircle,
-  AlertCircle
+  AlertCircle,
+  BookmarkPlus
 } from 'lucide-react';
 import { 
   ProjectEvolutionResult, 
@@ -23,6 +24,7 @@ import {
   generateProjectEvolution, 
   ProjectAnalysisInput 
 } from '@/engine/domainMatrix';
+import { saveProject } from '@/utils/studentStorage';
 
 interface EvolutionEngineProps {
   onSelectProjectForWorkshop: (projectTitle: string, trackTitle: string) => void;
@@ -63,6 +65,7 @@ export const EvolutionEngine: React.FC<EvolutionEngineProps> = ({
   const [result, setResult] = useState<ProjectEvolutionResult | null>(null);
   const [activeTrack, setActiveTrack] = useState<EvolutionTrack>('upgrade');
   const [selectedTrack, setSelectedTrack] = useState<EvolutionTrack>('upgrade');
+  const [saveFeedback, setSaveFeedback] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
 
   const loadingSteps = [
     'Analyzing domain keywords and technical scope...',
@@ -135,6 +138,27 @@ export const EvolutionEngine: React.FC<EvolutionEngineProps> = ({
     setValidationError('');
     setActiveTrack('upgrade');
     setSelectedTrack('upgrade');
+    setSaveFeedback(null);
+  };
+
+  const handleSaveToDashboard = () => {
+    if (!result || !currentPath) return;
+    const outcome = saveProject({
+      originalProject: result.originalProject,
+      domain: result.domain,
+      path: currentPath,
+    });
+    if (outcome.ok) {
+      setSaveFeedback({
+        tone: 'ok',
+        text: 'Saved to Student Dashboard. Refresh-safe in this browser only.',
+      });
+    } else {
+      setSaveFeedback({
+        tone: 'err',
+        text: outcome.error || 'Could not save this direction.',
+      });
+    }
   };
 
   const currentPath: EvolutionPath | null = result
@@ -688,36 +712,59 @@ export const EvolutionEngine: React.FC<EvolutionEngineProps> = ({
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
-                <Button
-                  variant="secondary"
-                  size="md"
-                  onClick={() => {
-                    onGenerateCommitCard?.(
-                      result.originalProject,
-                      currentPath,
-                      result.domain
-                    );
-                  }}
-                  leftIcon={<Sparkles className="w-4 h-4 text-emerald-400" />}
-                >
-                  Generate Commit Card
-                </Button>
-                <Button
-                  variant="glow"
-                  size="md"
-                  className="w-full sm:w-auto"
-                  onClick={() => {
-                    onSelectProjectForWorkshop(
-                      result.originalProject,
-                      currentPath.title
-                    );
-                    onOpenWorkshopModal();
-                  }}
-                  rightIcon={<ArrowRight className="w-4 h-4" />}
-                >
-                  Register for workshop
-                </Button>
+              <div className="flex flex-col items-stretch sm:items-end gap-2 w-full sm:w-auto">
+                {saveFeedback && (
+                  <p
+                    className={`text-xs ${
+                      saveFeedback.tone === 'ok' ? 'text-emerald-400' : 'text-amber-400'
+                    }`}
+                    role="status"
+                  >
+                    {saveFeedback.text}
+                  </p>
+                )}
+                <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">
+                  <Button
+                    variant="outline"
+                    size="md"
+                    onClick={handleSaveToDashboard}
+                    leftIcon={<BookmarkPlus className="w-4 h-4 text-cyan-400" />}
+                  >
+                    Save to Dashboard
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={() => {
+                      onGenerateCommitCard?.(
+                        result.originalProject,
+                        currentPath,
+                        result.domain
+                      );
+                    }}
+                    leftIcon={<Sparkles className="w-4 h-4 text-emerald-400" />}
+                  >
+                    Generate Commit Card
+                  </Button>
+                  <Button
+                    variant="glow"
+                    size="md"
+                    className="w-full sm:w-auto"
+                    onClick={() => {
+                      onSelectProjectForWorkshop(
+                        result.originalProject,
+                        currentPath.title
+                      );
+                      onOpenWorkshopModal();
+                    }}
+                    rightIcon={<ArrowRight className="w-4 h-4" />}
+                  >
+                    Register for workshop
+                  </Button>
+                </div>
+                <p className="text-[11px] text-zinc-500 max-w-sm text-right">
+                  Generating a direction does not auto-save it. Use Save to Dashboard to keep this track.
+                </p>
               </div>
             </div>
           </div>

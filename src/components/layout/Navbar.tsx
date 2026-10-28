@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Sparkles, Menu, X, ArrowUpRight, ArrowRight } from 'lucide-react';
+import { Sparkles, Menu, X, ArrowUpRight, ArrowRight, Award, LayoutDashboard } from 'lucide-react';
 import { ActiveTab } from '@/types';
+import { getOrCreateCurrentUserProfile } from '@/utils/referralEngine';
 
 interface NavbarProps {
   activeTab: ActiveTab;
@@ -18,6 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigateSection,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const currentUser = getOrCreateCurrentUserProfile();
 
   const navLinks = [
     { id: 'explore', label: 'Explore projects', sectionId: 'explore-section' },
@@ -57,7 +59,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="text-zinc-500 hidden sm:inline">·</span>
           <button
             onClick={onOpenWorkshopModal}
-            className="text-emerald-400 hover:text-emerald-300 font-medium inline-flex items-center gap-1 transition-colors underline underline-offset-2"
+            className="text-emerald-400 hover:text-emerald-300 font-medium inline-flex items-center gap-1 transition-colors underline underline-offset-2 cursor-pointer"
           >
             <span>Register free</span>
             <ArrowUpRight className="w-3 h-3" />
@@ -96,16 +98,54 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {link.label}
               </button>
             ))}
+
+            <button
+              onClick={() => onSelectTab('dashboard')}
+              className={`text-sm font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'dashboard'
+                  ? 'text-cyan-400 font-semibold'
+                  : 'text-zinc-400 hover:text-zinc-100'
+              }`}
+            >
+              <LayoutDashboard className="w-3.5 h-3.5" />
+              <span>Dashboard</span>
+            </button>
+
+            <button
+              onClick={() => onSelectTab('referrals')}
+              className={`text-sm font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'referrals'
+                  ? 'text-amber-400 font-semibold'
+                  : 'text-zinc-400 hover:text-zinc-100'
+              }`}
+            >
+              <Award className="w-3.5 h-3.5 text-amber-400" />
+              <span>Rewards & Blueprints</span>
+            </button>
           </nav>
 
-          {/* Right Action CTA */}
+          {/* Right Action CTA & Credits Pill */}
           <div className="hidden sm:flex items-center gap-3">
+            <button
+              onClick={() => onSelectTab('referrals')}
+              className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-amber-500/40 text-xs font-mono text-zinc-300 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="View Project Credits Ledger"
+            >
+              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span>{currentUser.credits} Credits</span>
+            </button>
+
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                onSelectTab('evolution');
-              }}
+              onClick={() => onSelectTab('dashboard')}
+            >
+              Dashboard
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onSelectTab('evolution')}
             >
               Evolution Engine
             </Button>
@@ -127,7 +167,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               aria-label="Toggle navigation menu"
               aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
@@ -146,8 +186,41 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {link.label}
               </button>
             ))}
+
+            <button
+              onClick={() => {
+                onSelectTab('dashboard');
+                setMobileMenuOpen(false);
+              }}
+              className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-cyan-400 hover:bg-zinc-800/60 transition-colors flex items-center gap-2"
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              <span>Student Dashboard</span>
+            </button>
+
+            <button
+              onClick={() => {
+                onSelectTab('referrals');
+                setMobileMenuOpen(false);
+              }}
+              className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-amber-400 hover:bg-zinc-800/60 transition-colors flex items-center gap-2"
+            >
+              <Award className="w-4 h-4" />
+              <span>Rewards & Blueprints ({currentUser.credits} Credits)</span>
+            </button>
           </div>
           <div className="pt-2 border-t border-zinc-800/80 flex flex-col gap-2">
+            <Button
+              variant="outline"
+              size="md"
+              className="w-full justify-center"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onSelectTab('dashboard');
+              }}
+            >
+              Dashboard
+            </Button>
             <Button
               variant="outline"
               size="md"

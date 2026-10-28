@@ -4,12 +4,16 @@ import { LandingPage } from '@/components/landing/LandingPage';
 import { EvolutionEngine } from '@/components/evolution/EvolutionEngine';
 import { CommitCard } from '@/components/commit-card/CommitCard';
 import { FriendMode } from '@/components/friend/FriendMode';
+import { ReferralHub } from '@/components/referral/ReferralHub';
+import { StudentDashboard } from '@/components/dashboard/StudentDashboard';
 import { WorkshopModal } from '@/components/workshop/WorkshopModal';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { ActiveTab, WorkshopRegistration, EvolutionPath } from '@/types';
+import { ActiveTab, WorkshopRegistration, EvolutionPath, ProjectFork } from '@/types';
 import { parseFriendUrlParams, ParsedFriendParams } from '@/utils/shareUrl';
-import { LayoutDashboard, BarChart3, GitFork } from 'lucide-react';
+import { captureReferralCode } from '@/utils/referralEngine';
+import { recordCommitCardGenerated } from '@/utils/studentStorage';
+import { BarChart3, GitFork, Award } from 'lucide-react';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('landing');
@@ -26,9 +30,10 @@ export function App() {
   // Friend Mode State (Phase 5)
   const [friendParams, setFriendParams] = useState<ParsedFriendParams | null>(null);
 
-  // Parse URL parameters on initial load
+  // Parse URL parameters and capture referral attribution on initial load
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      captureReferralCode(window.location.search);
       const parsed = parseFriendUrlParams(window.location.search);
       if (parsed) {
         setFriendParams(parsed);
@@ -37,7 +42,6 @@ export function App() {
   }, []);
 
   const handleRegistered = (reg: WorkshopRegistration) => {
-    // Keep in session state for Phase 6 referral linkage
     console.log('Registration completed:', reg);
   };
 
@@ -59,7 +63,26 @@ export function App() {
     path: EvolutionPath,
     domain: string
   ) => {
+    recordCommitCardGenerated({
+      projectTitle: path.title || originalProject,
+      track: path.track,
+      domain,
+    });
+    setFriendParams(null);
     setCommitCardData({ originalProject, path, domain });
+  };
+
+  const handleReopenFork = (fork: ProjectFork) => {
+    setCommitCardData(null);
+    setActiveTab('landing');
+    setFriendParams({
+      isValid: true,
+      title: fork.parentProjectTitle || 'Untitled Project Idea',
+      track: fork.parentTrack || 'upgrade',
+      authorName: fork.parentAuthor || 'Fellow Student',
+      domain: fork.parentDomain || 'Engineering Project',
+      isMalformed: !fork.parentProjectTitle,
+    });
   };
 
   // Demo simulator for testing Friend Mode directly without URL manual typing
@@ -71,8 +94,15 @@ export function App() {
       track: 'transform',
       authorName: 'Alex Chen',
       domain: 'Academic Operations & Campus Systems',
+      referralCode: 'PULSE-7842',
       isMalformed: false,
     });
+  };
+
+  // Demo simulator for testing Referral Link directly
+  const handleSimulateReferralLink = () => {
+    captureReferralCode('?ref=PULSE-8912');
+    setWorkshopModalOpen(true);
   };
 
   return (
@@ -86,28 +116,37 @@ export function App() {
       onOpenWorkshopModal={() => setWorkshopModalOpen(true)}
       onNavigateSection={handleNavigateSection}
     >
-      {/* Reviewer Shortcut Banner for Phase 5 verification */}
+      {/* Reviewer Shortcut Banner for Phase 5 & 6 testing */}
       {!friendParams && !commitCardData && activeTab === 'landing' && (
-        <div className="mb-6 p-3 rounded-xl border border-cyan-500/20 bg-zinc-900/60 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="mb-6 p-3 rounded-xl border border-amber-500/20 bg-zinc-900/60 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2">
-            <Badge variant="cyan" size="sm" dot>
-              Phase 5 Active
+            <Badge variant="amber" size="sm" dot>
+              Phase 6 Active
             </Badge>
             <span className="text-zinc-300">
-              Friend Mode & Collaborative Forking System
+              Referral Attribution & Milestone Rewards Engine
             </span>
           </div>
-          <button
-            onClick={handleSimulateFriendLink}
-            className="text-cyan-400 hover:text-cyan-300 font-medium inline-flex items-center gap-1.5 underline underline-offset-2 cursor-pointer"
-          >
-            <GitFork className="w-3.5 h-3.5" />
-            <span>Simulate Opening a Shared Friend Link</span>
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleSimulateFriendLink}
+              className="text-cyan-400 hover:text-cyan-300 font-medium inline-flex items-center gap-1.5 underline underline-offset-2 cursor-pointer"
+            >
+              <GitFork className="w-3.5 h-3.5" />
+              <span>Simulate Friend Link</span>
+            </button>
+            <button
+              onClick={handleSimulateReferralLink}
+              className="text-amber-400 hover:text-amber-300 font-medium inline-flex items-center gap-1.5 underline underline-offset-2 cursor-pointer"
+            >
+              <Award className="w-3.5 h-3.5" />
+              <span>Simulate ?ref=PULSE-8912 Registration</span>
+            </button>
+          </div>
         </div>
       )}
 
-      {/* VIEW: FRIEND MODE (When friend link is opened) */}
+      {/* VIEW: FRIEND MODE (Phase 5) */}
       {friendParams ? (
         <FriendMode
           friendParams={friendParams}
@@ -157,26 +196,29 @@ export function App() {
             />
           )}
 
-          {/* 3. Student Hub Placeholder (Phase 7) */}
-          {activeTab === 'dashboard' && (
-            <div className="max-w-3xl mx-auto py-12 text-center space-y-6 animate-in fade-in-50 duration-200">
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-400">
-                <LayoutDashboard className="w-8 h-8" />
-              </div>
-              <div className="space-y-2">
-                <Badge variant="cyan" dot>Phase 7 Ahead</Badge>
-                <h2 className="text-2xl sm:text-3xl font-bold text-white">Student Hub & Credits</h2>
-                <p className="text-sm text-zinc-400 max-w-lg mx-auto leading-relaxed">
-                  Track your generated project roadmaps, referral attribution links, and unlocked Project Credits.
-                </p>
-              </div>
-              <Button variant="secondary" onClick={() => setActiveTab('landing')}>
-                Back to Overview
-              </Button>
-            </div>
+          {/* 3. Referral & Rewards Hub (Phase 6 Core Feature) */}
+          {activeTab === 'referrals' && (
+            <ReferralHub
+              onOpenWorkshopModal={() => setWorkshopModalOpen(true)}
+              onExploreProjects={() => setActiveTab('evolution')}
+            />
           )}
 
-          {/* 4. Growth Console Placeholder (Phase 8) */}
+          {/* 4. Student Dashboard (Phase 7) */}
+          {activeTab === 'dashboard' && (
+            <StudentDashboard
+              onNavigateTab={(tab) => {
+                setCommitCardData(null);
+                setFriendParams(null);
+                setActiveTab(tab);
+              }}
+              onOpenWorkshopModal={() => setWorkshopModalOpen(true)}
+              onGenerateCommitCard={handleGenerateCommitCard}
+              onReopenFork={handleReopenFork}
+            />
+          )}
+
+          {/* 5. Growth Console Placeholder (Phase 8) */}
           {activeTab === 'admin' && (
             <div className="max-w-3xl mx-auto py-12 text-center space-y-6 animate-in fade-in-50 duration-200">
               <div className="w-16 h-16 mx-auto rounded-2xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-400">

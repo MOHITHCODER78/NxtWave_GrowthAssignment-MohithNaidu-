@@ -19,6 +19,7 @@ import {
   EvolutionPath
 } from '@/types';
 import { ParsedFriendParams } from '@/utils/shareUrl';
+import { saveFork } from '@/utils/studentStorage';
 
 interface FriendModeProps {
   friendParams: ParsedFriendParams;
@@ -185,7 +186,7 @@ export const FriendMode: React.FC<FriendModeProps> = ({
     },
   ];
 
-  // Save fork locally to prototype storage
+  // Save fork locally to prototype storage (same key as Student Dashboard)
   const handleSaveForkLocally = () => {
     const forkRecord: ProjectFork = {
       id: `fork_${Date.now()}`,
@@ -201,19 +202,11 @@ export const FriendMode: React.FC<FriendModeProps> = ({
       targetUser,
       specificAiCapability,
       keyApproach,
-      recommendedStack: techStack.split(',').map((s) => s.trim()),
+      recommendedStack: techStack.split(',').map((s) => s.trim()).filter(Boolean),
       createdAt: new Date().toISOString(),
     };
 
-    try {
-      const stored = localStorage.getItem('projectpulse_forks');
-      const list: ProjectFork[] = stored ? JSON.parse(stored) : [];
-      list.push(forkRecord);
-      localStorage.setItem('projectpulse_forks', JSON.stringify(list));
-    } catch {
-      // LocalStorage fallback
-    }
-
+    saveFork(forkRecord);
     setActiveTab('comparison');
   };
 

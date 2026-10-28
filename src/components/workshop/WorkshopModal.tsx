@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { X, CheckCircle2, Shield, ArrowRight } from 'lucide-react';
+import { X, CheckCircle2, Shield, ArrowRight, Award } from 'lucide-react';
 import { WorkshopRegistration } from '@/types';
+import { processWorkshopRegistration, getCapturedAttribution } from '@/utils/referralEngine';
 
 interface WorkshopModalProps {
   isOpen: boolean;
@@ -32,6 +33,18 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [referralFeedback, setReferralFeedback] = useState<string>('');
+
+  useEffect(() => {
+    if (isOpen) {
+      const captured = getCapturedAttribution();
+      setFormData((prev) => ({
+        ...prev,
+        projectIdea: initialProjectTitle || prev.projectIdea,
+        referralCode: prev.referralCode || initialReferralCode || captured || '',
+      }));
+    }
+  }, [isOpen, initialProjectTitle, initialReferralCode]);
 
   if (!isOpen) return null;
 
@@ -65,6 +78,7 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({
         registeredAt: new Date().toISOString(),
       };
 
+      // 1. Persist registration record
       try {
         const stored = localStorage.getItem('projectpulse_registrations');
         const existing: WorkshopRegistration[] = stored ? JSON.parse(stored) : [];
@@ -74,15 +88,26 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({
         // Fallback gracefully
       }
 
+      // 2. Process referral attribution idempotently via referral engine
+      if (newRegistration.referralCodeUsed) {
+        const result = processWorkshopRegistration(newRegistration);
+        if (result.status === 'qualified') {
+          setReferralFeedback('Referral verified: 50 Project Credits awarded to your referrer!');
+        } else if (result.status === 'rejected') {
+          setReferralFeedback(result.rejectionReason || 'Referral was not eligible for credit.');
+        }
+      }
+
       setIsSubmitting(false);
       setSubmitted(true);
       onRegistered?.(newRegistration);
-    }, 700);
+    }, 600);
   };
 
   const resetAndClose = () => {
     setSubmitted(false);
     setErrorMsg('');
+    setReferralFeedback('');
     onClose();
   };
 
@@ -145,9 +170,17 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({
                 <span className="text-emerald-400 font-medium">4x 15-Minute Sprints</span>
               </div>
               {formData.referralCode && (
-                <div className="flex items-center justify-between text-zinc-400 pt-1 border-t border-zinc-800">
-                  <span>Referral Code Applied</span>
-                  <span className="font-mono text-cyan-400">{formData.referralCode.toUpperCase()}</span>
+                <div className="pt-2 border-t border-zinc-800 space-y-1">
+                  <div className="flex items-center justify-between text-zinc-400">
+                    <span>Referral Code</span>
+                    <span className="font-mono text-cyan-400 font-semibold">{formData.referralCode.toUpperCase()}</span>
+                  </div>
+                  {referralFeedback && (
+                    <p className="text-[11px] text-emerald-400 flex items-center gap-1 mt-0.5">
+                      <Award className="w-3.5 h-3.5 shrink-0" />
+                      <span>{referralFeedback}</span>
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -247,9 +280,16 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-300">
-                Referral code (if a friend invited you)
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-medium text-zinc-300">
+                  Referral code (if a friend invited you)
+                </label>
+                {formData.referralCode && (
+                  <span className="text-[10px] text-emerald-400 font-mono">
+                    Attribution Active
+                  </span>
+                )}
+              </div>
               <input
                 type="text"
                 placeholder="e.g. PULSE-7842"
