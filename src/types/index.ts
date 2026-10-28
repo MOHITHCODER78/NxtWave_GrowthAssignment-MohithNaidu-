@@ -15,10 +15,15 @@ export interface EvolutionPath {
   title: string;
   tagline: string;
   overview: string;
+  problemSolved: string;
+  targetUser: string;
+  specificAiCapability: string;
+  whyUseful: string;
   architecturalShift: string;
   recommendedStack: string[];
   sixtyMinuteStarterPlan: StarterSprint[];
   difficulty: 'Beginner Friendly' | 'Intermediate' | 'Advanced';
+  nextAction: string;
 }
 
 export interface ProjectEvolutionResult {
