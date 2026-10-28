@@ -51,6 +51,39 @@ export interface CommitCardData {
   createdAt: string;
 }
 
+export interface ProjectFork {
+  id: string;
+  parentProjectTitle: string;
+  parentAuthor: string;
+  parentTrack: EvolutionTrack;
+  parentDomain: string;
+  parentAiCapability?: string;
+  forkTitle: string;
+  forkAuthor: string;
+  forkTrack: EvolutionTrack;
+  problemSolved: string;
+  targetUser: string;
+  specificAiCapability: string;
+  keyApproach: string;
+  recommendedStack: string[];
+  createdAt: string;
+}
+
+export interface ForkFieldDiff {
+  field: string;
+  label: string;
+  originalValue: string;
+  forkValue: string;
+  isChanged: boolean;
+}
+
+export interface CollaborationSuggestion {
+  id: string;
+  title: string;
+  description: string;
+  synergyType: 'Shared Data Model' | 'API Contract' | 'Complementary Feature' | 'Workshop Pair';
+}
+
 export interface StudentProfile {
   id: string;
   name: string;
@@ -95,4 +128,3 @@ export interface GrowthMetricEvent {
 }
 
 export type ActiveTab = 'landing' | 'evolution' | 'dashboard' | 'admin' | 'friend-view';
-

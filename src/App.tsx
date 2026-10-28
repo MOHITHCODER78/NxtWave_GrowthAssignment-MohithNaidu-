@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AppShell } from '@/components/layout/AppShell';
 import { LandingPage } from '@/components/landing/LandingPage';
 import { EvolutionEngine } from '@/components/evolution/EvolutionEngine';
 import { CommitCard } from '@/components/commit-card/CommitCard';
+import { FriendMode } from '@/components/friend/FriendMode';
 import { WorkshopModal } from '@/components/workshop/WorkshopModal';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { ActiveTab, WorkshopRegistration, EvolutionPath } from '@/types';
-import { LayoutDashboard, BarChart3 } from 'lucide-react';
+import { parseFriendUrlParams, ParsedFriendParams } from '@/utils/shareUrl';
+import { LayoutDashboard, BarChart3, GitFork } from 'lucide-react';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('landing');
@@ -21,6 +23,19 @@ export function App() {
     domain: string;
   } | null>(null);
 
+  // Friend Mode State (Phase 5)
+  const [friendParams, setFriendParams] = useState<ParsedFriendParams | null>(null);
+
+  // Parse URL parameters on initial load
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const parsed = parseFriendUrlParams(window.location.search);
+      if (parsed) {
+        setFriendParams(parsed);
+      }
+    }
+  }, []);
+
   const handleRegistered = (reg: WorkshopRegistration) => {
     // Keep in session state for Phase 6 referral linkage
     console.log('Registration completed:', reg);
@@ -28,6 +43,7 @@ export function App() {
 
   const handleNavigateSection = (sectionId: string) => {
     setCommitCardData(null);
+    setFriendParams(null);
     const el = document.getElementById(sectionId);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
@@ -46,18 +62,67 @@ export function App() {
     setCommitCardData({ originalProject, path, domain });
   };
 
+  // Demo simulator for testing Friend Mode directly without URL manual typing
+  const handleSimulateFriendLink = () => {
+    setCommitCardData(null);
+    setFriendParams({
+      isValid: true,
+      title: 'Smart Lecture Digest Assistant',
+      track: 'transform',
+      authorName: 'Alex Chen',
+      domain: 'Academic Operations & Campus Systems',
+      isMalformed: false,
+    });
+  };
+
   return (
     <AppShell
       activeTab={activeTab}
       onSelectTab={(tab) => {
         setCommitCardData(null);
+        setFriendParams(null);
         setActiveTab(tab);
       }}
       onOpenWorkshopModal={() => setWorkshopModalOpen(true)}
       onNavigateSection={handleNavigateSection}
     >
-      {/* If Commit Card is active, render Commit Card View */}
-      {commitCardData ? (
+      {/* Reviewer Shortcut Banner for Phase 5 verification */}
+      {!friendParams && !commitCardData && activeTab === 'landing' && (
+        <div className="mb-6 p-3 rounded-xl border border-cyan-500/20 bg-zinc-900/60 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2">
+            <Badge variant="cyan" size="sm" dot>
+              Phase 5 Active
+            </Badge>
+            <span className="text-zinc-300">
+              Friend Mode & Collaborative Forking System
+            </span>
+          </div>
+          <button
+            onClick={handleSimulateFriendLink}
+            className="text-cyan-400 hover:text-cyan-300 font-medium inline-flex items-center gap-1.5 underline underline-offset-2 cursor-pointer"
+          >
+            <GitFork className="w-3.5 h-3.5" />
+            <span>Simulate Opening a Shared Friend Link</span>
+          </button>
+        </div>
+      )}
+
+      {/* VIEW: FRIEND MODE (When friend link is opened) */}
+      {friendParams ? (
+        <FriendMode
+          friendParams={friendParams}
+          onExploreOwnProject={() => {
+            setFriendParams(null);
+            setActiveTab('evolution');
+          }}
+          onGenerateCommitCard={handleGenerateCommitCard}
+          onRegisterWorkshop={(pTitle, tTitle) => {
+            handleSelectProjectForWorkshop(pTitle, tTitle);
+            setWorkshopModalOpen(true);
+          }}
+        />
+      ) : commitCardData ? (
+        /* VIEW: COMMIT CARD (Phase 4) */
         <CommitCard
           originalProjectName={commitCardData.originalProject}
           evolutionPath={commitCardData.path}
@@ -69,6 +134,7 @@ export function App() {
           }}
         />
       ) : (
+        /* STANDARD PRODUCT VIEWS */
         <>
           {/* 1. Landing Page View (Phase 2) */}
           {activeTab === 'landing' && (
@@ -76,12 +142,13 @@ export function App() {
               onOpenWorkshopModal={() => setWorkshopModalOpen(true)}
               onNavigateTab={(tab) => {
                 setCommitCardData(null);
+                setFriendParams(null);
                 setActiveTab(tab);
               }}
             />
           )}
 
-          {/* 2. Evolution Engine Tab (Phase 3 & Phase 4 Trigger) */}
+          {/* 2. Evolution Engine Tab (Phase 3) */}
           {activeTab === 'evolution' && (
             <EvolutionEngine
               onSelectProjectForWorkshop={handleSelectProjectForWorkshop}
