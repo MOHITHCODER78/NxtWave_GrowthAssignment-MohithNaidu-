@@ -7,6 +7,7 @@ interface AppShellProps {
   activeTab: ActiveTab;
   onSelectTab: (tab: ActiveTab) => void;
   onOpenWorkshopModal: () => void;
+  onNavigateSection?: (sectionId: string) => void;
   children: React.ReactNode;
 }
 
@@ -14,6 +15,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   activeTab,
   onSelectTab,
   onOpenWorkshopModal,
+  onNavigateSection,
   children,
 }) => {
   return (
@@ -28,6 +30,7 @@ export const AppShell: React.FC<AppShellProps> = ({
         activeTab={activeTab}
         onSelectTab={onSelectTab}
         onOpenWorkshopModal={onOpenWorkshopModal}
+        onNavigateSection={onNavigateSection}
       />
 
       <main className="flex-1 relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:py-12">

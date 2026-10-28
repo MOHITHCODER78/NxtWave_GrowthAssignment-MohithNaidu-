@@ -90,3 +90,4 @@ export interface GrowthMetricEvent {
 }
 
 export type ActiveTab = 'landing' | 'evolution' | 'dashboard' | 'admin' | 'friend-view';
+
