@@ -27,6 +27,7 @@ import {
 interface EvolutionEngineProps {
   onSelectProjectForWorkshop: (projectTitle: string, trackTitle: string) => void;
   onOpenWorkshopModal: () => void;
+  onGenerateCommitCard?: (originalProject: string, path: EvolutionPath, domain: string) => void;
 }
 
 const BEGINNER_INTERESTS = [
@@ -42,6 +43,7 @@ const BEGINNER_INTERESTS = [
 export const EvolutionEngine: React.FC<EvolutionEngineProps> = ({
   onSelectProjectForWorkshop,
   onOpenWorkshopModal,
+  onGenerateCommitCard,
 }) => {
   const [mode, setMode] = useState<'existing' | 'beginner'>('existing');
 
@@ -686,7 +688,21 @@ export const EvolutionEngine: React.FC<EvolutionEngineProps> = ({
                 </span>
               </div>
 
-              <div className="flex items-center gap-2.5 w-full sm:w-auto">
+              <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={() => {
+                    onGenerateCommitCard?.(
+                      result.originalProject,
+                      currentPath,
+                      result.domain
+                    );
+                  }}
+                  leftIcon={<Sparkles className="w-4 h-4 text-emerald-400" />}
+                >
+                  Generate Commit Card
+                </Button>
                 <Button
                   variant="glow"
                   size="md"
@@ -700,7 +716,7 @@ export const EvolutionEngine: React.FC<EvolutionEngineProps> = ({
                   }}
                   rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
-                  Register for workshop with this idea
+                  Register for workshop
                 </Button>
               </div>
             </div>
