@@ -14,7 +14,5 @@
     "VITE_SUPABASE_URL": "@env/VITE_SUPABASE_URL",
     "VITE_SUPABASE_ANON_KEY": "@env/VITE_SUPABASE_ANON_KEY",
     "VITE_APP_MODE": "production"
-  },
-  "regions": ["odc1"],
-  "outputDirectory": "dist"
+  }
 }
