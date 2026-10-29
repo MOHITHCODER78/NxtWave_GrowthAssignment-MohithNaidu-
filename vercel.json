@@ -12,7 +12,7 @@
   ],
   "env": {
     "VITE_SUPABASE_URL": "https://orspqbxyjkvourjlcnus.supabase.co",
-    "VITE_SUPABASE_ANON_KEY": "",
+    "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yc3BxYnh5amt2b3VyamxjbnVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyNDM0ODAsImV4cCI6MjEwODgxOTQ4MH0.yB9H5I0zt2bIYxOF8-XHmnvSYiiXTXGWK3j8DTrdOso",
     "VITE_APP_MODE": "production"
   }
 }
