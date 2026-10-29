@@ -17,6 +17,7 @@ import { toPng } from 'html-to-image';
 import { EvolutionPath } from '@/types';
 import { generateShareUrl, generateQrCodeDataUrl } from '@/utils/shareUrl';
 import { getOrCreateCurrentUserProfile } from '@/utils/referralEngine';
+import { trackEvent } from '@/utils/analytics';
 
 interface CommitCardProps {
   originalProjectName: string;
@@ -33,7 +34,7 @@ export const CommitCard: React.FC<CommitCardProps> = ({
   onBackToEngine,
   onRegisterWorkshop,
 }) => {
-  const [authorName, setAuthorName] = useState('Alex Chen');
+  const [authorName, setAuthorName] = useState('Student Creator');
   const [pledgeText, setPledgeText] = useState(
     'I commit 60 minutes to build the working foundation of this AI project.'
   );
@@ -94,6 +95,10 @@ export const CommitCard: React.FC<CommitCardProps> = ({
       downloadLink.download = safeFilename;
       downloadLink.href = dataUrl;
       downloadLink.click();
+      trackEvent('commit_card_downloaded', {
+        track: evolutionPath.track,
+        commitId,
+      });
     } catch (err) {
       console.error('Download card error:', err);
       setExportError('Unable to export image directly. Please try taking a screenshot or copying the link.');
@@ -107,6 +112,7 @@ export const CommitCard: React.FC<CommitCardProps> = ({
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopiedLink(true);
+      trackEvent('share_link_copied', { track: evolutionPath.track });
       setTimeout(() => setCopiedLink(false), 2000);
     } catch {
       // Fallback

@@ -6,14 +6,14 @@ import { CommitCard } from '@/components/commit-card/CommitCard';
 import { FriendMode } from '@/components/friend/FriendMode';
 import { ReferralHub } from '@/components/referral/ReferralHub';
 import { StudentDashboard } from '@/components/dashboard/StudentDashboard';
-import { WorkshopModal } from '@/components/workshop/WorkshopModal';
-import { Button } from '@/components/ui/Button';
+import { GrowthConsole } from '@/components/admin/GrowthConsole';
 import { Badge } from '@/components/ui/Badge';
+import { WorkshopModal } from '@/components/workshop/WorkshopModal';
 import { ActiveTab, WorkshopRegistration, EvolutionPath, ProjectFork } from '@/types';
 import { parseFriendUrlParams, ParsedFriendParams } from '@/utils/shareUrl';
 import { captureReferralCode } from '@/utils/referralEngine';
 import { recordCommitCardGenerated } from '@/utils/studentStorage';
-import { BarChart3, GitFork, Award } from 'lucide-react';
+import { GitFork, Award } from 'lucide-react';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('landing');
@@ -92,9 +92,9 @@ export function App() {
       isValid: true,
       title: 'Smart Lecture Digest Assistant',
       track: 'transform',
-      authorName: 'Alex Chen',
+      authorName: 'Student Creator',
       domain: 'Academic Operations & Campus Systems',
-      referralCode: 'PULSE-7842',
+      referralCode: 'PULSE-START',
       isMalformed: false,
     });
   };
@@ -218,24 +218,8 @@ export function App() {
             />
           )}
 
-          {/* 5. Growth Console Placeholder (Phase 8) */}
-          {activeTab === 'admin' && (
-            <div className="max-w-3xl mx-auto py-12 text-center space-y-6 animate-in fade-in-50 duration-200">
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-400">
-                <BarChart3 className="w-8 h-8" />
-              </div>
-              <div className="space-y-2">
-                <Badge variant="purple" dot>Phase 8 Ahead</Badge>
-                <h2 className="text-2xl sm:text-3xl font-bold text-white">Growth Intelligence Console</h2>
-                <p className="text-sm text-zinc-400 max-w-lg mx-auto leading-relaxed">
-                  Server-authenticated funnel analytics, conversion drop-offs, and live event telemetry.
-                </p>
-              </div>
-              <Button variant="secondary" onClick={() => setActiveTab('landing')}>
-                Back to Overview
-              </Button>
-            </div>
-          )}
+          {/* 5. Growth Console (Phase 8) */}
+          {activeTab === 'admin' && <GrowthConsole onNavigateTab={setActiveTab} />}
         </>
       )}
 

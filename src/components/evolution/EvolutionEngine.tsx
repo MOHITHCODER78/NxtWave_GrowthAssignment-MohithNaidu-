@@ -25,6 +25,7 @@ import {
   ProjectAnalysisInput 
 } from '@/engine/domainMatrix';
 import { saveProject } from '@/utils/studentStorage';
+import { trackEvent } from '@/utils/analytics';
 
 interface EvolutionEngineProps {
   onSelectProjectForWorkshop: (projectTitle: string, trackTitle: string) => void;
@@ -130,6 +131,10 @@ export const EvolutionEngine: React.FC<EvolutionEngineProps> = ({
       setActiveTrack('upgrade');
       setSelectedTrack('upgrade');
       setIsAnalyzing(false);
+      trackEvent('evolution_generated', {
+        domain: evolutionResult.domain,
+        mode,
+      });
     }, 1400);
   };
 
@@ -149,6 +154,10 @@ export const EvolutionEngine: React.FC<EvolutionEngineProps> = ({
       path: currentPath,
     });
     if (outcome.ok) {
+      trackEvent('project_saved', {
+        track: currentPath.track,
+        domain: result.domain,
+      });
       setSaveFeedback({
         tone: 'ok',
         text: 'Saved to Student Dashboard. Refresh-safe in this browser only.',
@@ -696,7 +705,10 @@ export const EvolutionEngine: React.FC<EvolutionEngineProps> = ({
                 <Button
                   variant={selectedTrack === activeTrack ? 'primary' : 'outline'}
                   size="md"
-                  onClick={() => setSelectedTrack(activeTrack)}
+                  onClick={() => {
+                    setSelectedTrack(activeTrack);
+                    trackEvent('track_selected', { track: activeTrack });
+                  }}
                   leftIcon={
                     selectedTrack === activeTrack ? (
                       <CheckCircle2 className="w-4 h-4 text-zinc-950" />

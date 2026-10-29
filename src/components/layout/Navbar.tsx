@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Sparkles, Menu, X, ArrowUpRight, ArrowRight, Award, LayoutDashboard } from 'lucide-react';
+import { Sparkles, Menu, X, ArrowUpRight, ArrowRight, Award, LayoutDashboard, BarChart3 } from 'lucide-react';
 import { ActiveTab } from '@/types';
 import { getOrCreateCurrentUserProfile } from '@/utils/referralEngine';
 
@@ -122,6 +122,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Award className="w-3.5 h-3.5 text-amber-400" />
               <span>Rewards & Blueprints</span>
             </button>
+
+            <button
+              onClick={() => onSelectTab('admin')}
+              className={`text-sm font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'admin'
+                  ? 'text-purple-400 font-semibold'
+                  : 'text-zinc-400 hover:text-zinc-100'
+              }`}
+            >
+              <BarChart3 className="w-3.5 h-3.5 text-purple-400" />
+              <span>Admin Console</span>
+            </button>
           </nav>
 
           {/* Right Action CTA & Credits Pill */}
@@ -207,6 +219,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Award className="w-4 h-4" />
               <span>Rewards & Blueprints ({currentUser.credits} Credits)</span>
+            </button>
+
+            <button
+              onClick={() => {
+                onSelectTab('admin');
+                setMobileMenuOpen(false);
+              }}
+              className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-purple-400 hover:bg-zinc-800/60 transition-colors flex items-center gap-2"
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>Admin Console</span>
             </button>
           </div>
           <div className="pt-2 border-t border-zinc-800/80 flex flex-col gap-2">

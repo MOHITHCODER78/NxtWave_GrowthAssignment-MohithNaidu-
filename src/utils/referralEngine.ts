@@ -38,10 +38,10 @@ export function getOrCreateCurrentUserProfile(): StudentProfile {
   if (typeof window === 'undefined') {
     return {
       id: 'student_dev',
-      name: 'Alex Chen',
-      email: 'alex.chen@campus.edu',
-      college: 'VJTI College of Engineering',
-      referralCode: 'PULSE-7842',
+      name: 'Student Creator',
+      email: 'student@college.edu',
+      college: 'Your College',
+      referralCode: 'PULSE-START',
       credits: 0,
       createdAt: new Date().toISOString(),
     };
@@ -55,10 +55,10 @@ export function getOrCreateCurrentUserProfile(): StudentProfile {
 
     const newProfile: StudentProfile = {
       id: `std_${Date.now()}`,
-      name: 'Alex Chen',
-      email: 'alex.chen@campus.edu',
-      college: 'VJTI College of Engineering',
-      referralCode: 'PULSE-7842',
+      name: 'Student Creator',
+      email: 'student@college.edu',
+      college: 'Your College',
+      referralCode: 'PULSE-START',
       credits: 0,
       createdAt: new Date().toISOString(),
     };
@@ -68,10 +68,10 @@ export function getOrCreateCurrentUserProfile(): StudentProfile {
   } catch {
     return {
       id: 'student_dev',
-      name: 'Alex Chen',
-      email: 'alex.chen@campus.edu',
-      college: 'VJTI College of Engineering',
-      referralCode: 'PULSE-7842',
+      name: 'Student Creator',
+      email: 'student@college.edu',
+      college: 'Your College',
+      referralCode: 'PULSE-START',
       credits: 0,
       createdAt: new Date().toISOString(),
     };

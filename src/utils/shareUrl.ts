@@ -37,7 +37,7 @@ function sanitize(input: string | null | undefined): string {
  * Encodes only public project parameters. Contains ZERO private student PII.
  */
 export function generateShareUrl(payload: SharePayload): string {
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://projectpulse.live';
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://localhost';
   const params = new URLSearchParams();
   
   params.set('view', 'friend');
@@ -60,7 +60,7 @@ export function generateShareUrl(payload: SharePayload): string {
  * Generates a direct personal referral link without Friend Mode parameters.
  */
 export function generateReferralOnlyUrl(referralCode: string): string {
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://projectpulse.live';
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://localhost';
   return `${origin}/?ref=${encodeURIComponent(referralCode.trim().toUpperCase())}`;
 }
 

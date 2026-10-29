@@ -140,23 +140,59 @@ export interface WorkshopRegistration {
   registeredAt: string;
 }
 
+export type GrowthEventName =
+  | 'page_view'
+  | 'evolution_generated'
+  | 'track_selected'
+  | 'commit_card_created'
+  | 'commit_card_downloaded'
+  | 'share_link_copied'
+  | 'project_forked'
+  | 'workshop_registered'
+  | 'referral_click'
+  | 'referral_converted'
+  | 'project_saved';
+
 export interface GrowthMetricEvent {
   id: string;
-  eventName:
-    | 'page_view'
-    | 'evolution_generated'
-    | 'track_selected'
-    | 'commit_card_created'
-    | 'commit_card_downloaded'
-    | 'share_link_copied'
-    | 'project_forked'
-    | 'workshop_registered'
-    | 'referral_converted';
+  eventName: GrowthEventName;
   metadata: Record<string, unknown>;
   timestamp: string;
+  sessionId: string;
   source?: string;
   utmSource?: string;
   utmMedium?: string;
+  utmCampaign?: string;
+  /** Client-supplied dedupe key to prevent double-counting identical actions. */
+  dedupeKey?: string;
+}
+
+export interface CampaignConfig {
+  targetRegistrations: number;
+  budgetInr: number;
+  durationDays: number;
+  label: string;
+}
+
+export type ExperimentResultLabel = 'manual' | 'simulated' | 'insufficient_data';
+
+export interface ExperimentVariant {
+  id: string;
+  name: string;
+  description: string;
+  /** Manually entered or simulated metric — never claimed as statistically significant. */
+  observedMetric?: number;
+  resultLabel: ExperimentResultLabel;
+  notes?: string;
+}
+
+export interface GrowthExperiment {
+  id: string;
+  hypothesis: string;
+  metric: string;
+  variants: ExperimentVariant[];
+  createdAt: string;
+  status: 'planned' | 'running' | 'concluded';
 }
 
 /** Locally persisted evolution direction (Phase 7 Student Dashboard). */
